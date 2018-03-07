@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Minimalist TO-DO list</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+
+
+    <script>
+
+    var refresh;
+    var openFile = function(event) {
+      var input = event.target;
+      var reader = new FileReader();
+        reader.onload = function(){
+          var importedTasks = reader.result;
+          document.getElementById('tablebody').innerHTML = importedTasks;
+          refresh = importedTasks;
+          localStorage.setItem("antirefresh", refresh);
+          console.log(reader.result.substring(0, 200));
+        };
+      reader.readAsText(input.files[0]);
+    };
+
+    function localcheck(){
+    document.getElementById('tablebody').innerHTML = localStorage.getItem("antirefresh");
+    };
+
+    $(document).ready(function(){
+      var cnt = 0;
+      var taskID = 0;
+
+      $("#addNew").on("click", function(){
+        var newRow = $("<tr>");
+        var clmn = "";
+        var task = document.getElementById('taskText').value;
+
+        document.getElementById('taskText').value = "";
+        document.getElementById('taskText').placeholder="Type in to-do text..."
+
+        clmn += '<td>' + task + '</td>';
+        clmn += '<td><input type="checkbox" class="form-control"/></td>';
+        clmn += '<td><input type="button" class="btnDel btn-md btn-danger "  value="Delete"></td>';
+        refresh += '<tr id="'+ taskID +'">' + clmn + '</tr>';
+        localStorage.setItem("antirefresh", refresh);
+        console.log(refresh);
+        newRow.append(clmn);
+
+        $("table.order-list").append(newRow);
+        cnt++;
+        taskID++;
+
+      });
+
+      $("table.order-list").on("click", ".btnDel", function (event) {
+        $(this).closest("tr").remove();
+        cnt -= 1
+      });
+
+      $("#export").on("click", function(){
+        var backup = refresh;
+        var tmp = document.createElement('a');
+        tmp.href='data:attachment/text,' + encodeURI(backup);
+        tmp.target = '_blank';
+        tmp.download = 'backup.txt';
+        tmp.click();
+
+        });
+    });
+    </script>
+
+</head>
+<body onload="localcheck()">
+  <div class="container">
+    <table id="toDoTasks" class="table order-list">
+      <thead>
+        <form>
+          <div class="input-group">
+            <input type="text" id="taskText"class="form-control" placeholder="Type in to-do text..."/>
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-outline-primary" id="addNew"> Add new </button>
+              <button type="button" class="btn btn-outline-secondary" id="export">Export</button>
+              <input type="file" class="btn btn-sm btn-outline-secondary"  accept="text/plain" onchange="openFile(event)"id="import"/>
+            </div>
+          </div>
+        </form>
+        <tr><td></td></tr>
+        <thead>
+          <td class="text-left font-weight-bold">to-do text</td>
+          <td class="text-center font-weight-bold">Completed</td>
+          <td class="text-left font-weight-bold">Delete</td>
+        </thead>
+      </thead>
+        <tbody id="tablebody">
+        </tbody>
+    </table>
+  </div>
+
+</body>
+</html>
